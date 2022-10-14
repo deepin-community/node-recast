@@ -1,0 +1,32 @@
+Description: workaround tsc update
+Author: Yadd <yadd@debian.org>
+Forwarded: not-needed
+Last-Update: 2021-09-17
+
+--- a/test/es6tests.ts
++++ b/test/es6tests.ts
+@@ -144,6 +144,7 @@
+           "Parsing should have failed: " + JSON.stringify(source),
+         );
+       } catch (err) {
++        // @ts-ignore
+         assert.strictEqual(err.message, "Line 1: " + expectedMessage);
+       }
+     }
+--- a/test/typescript.ts
++++ b/test/typescript.ts
+@@ -409,12 +409,14 @@
+           .toString(),
+       );
+     } catch (e2) {
++      // @ts-ignore
+       if (e2.code !== "ENOENT") {
+         console.error(e2);
+       }
+       throw e1;
+     }
+ 
++    // @ts-ignore
+     if (options.throws === e1.message) {
+       return null;
+     }

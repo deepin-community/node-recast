@@ -1,0 +1,264 @@
+node-recast (0.20.5-2) unstable; urgency=medium
+
+  * Team upload
+  * Fix autopkgtest
+
+ -- Yadd <yadd@debian.org>  Tue, 28 Sep 2021 07:41:41 +0200
+
+node-recast (0.20.5-1) unstable; urgency=medium
+
+  * Team upload
+
+  [ Julien Puydt ]
+  * New upstream release 0.20.5.
+
+  [ Yadd ]
+  * Add patch to workaround tsc update
+
+ -- Yadd <yadd@debian.org>  Fri, 17 Sep 2021 12:39:56 +0200
+
+node-recast (0.20.4-4) unstable; urgency=medium
+
+  [Debian janitor ]
+  * Remove constraints unnecessary since buster:
+    + Build-Depends: Drop versioned constraint on node-ast-types.
+
+ -- Julien Puydt <jpuydt@debian.org>  Thu, 26 Aug 2021 21:34:19 +0200
+
+node-recast (0.20.4-3) unstable; urgency=medium
+
+  [ Julien Puydt ]
+  * Fix d/watch.
+  * Drop dep on node-typescript-types in favor of
+   more specific packages. (Closes: #979776)
+  * Bump std-vers to 4.6.0.
+  * Try to work on autopkgtesting.
+  * Mark node-recast as Multi-Arch foreign.
+
+  [ Debian Janitor ]
+  * Remove constraints unnecessary since buster:
+    + Build-Depends: Drop versioned constraint on node-ast-types.
+
+ -- Julien Puydt <jpuydt@debian.org>  Thu, 26 Aug 2021 21:33:45 +0200
+
+node-recast (0.20.4-2) unstable; urgency=medium
+
+  * Team upload
+
+  [ lintian-brush ]
+  * Set upstream metadata fields: Bug-Database, Bug-Submit, Repository,
+    Repository-Browse.
+
+  [ Xavier Guimard ]
+  * Declare compliance with policy 4.5.1
+  * Add debian/gbp.conf
+  * Use dh-sequence-nodejs auto install
+  * Add build dependency to node-types-estree, fixes debci
+
+ -- Xavier Guimard <yadd@debian.org>  Tue, 05 Jan 2021 12:14:26 +0100
+
+node-recast (0.20.4-1) unstable; urgency=medium
+
+  * New upstream version.
+
+ -- Julien Puydt <jpuydt@debian.org>  Fri, 16 Oct 2020 08:04:23 +0200
+
+node-recast (0.20.3-1) unstable; urgency=medium
+
+  [ Pirate Praveen ]
+  * New upstream version 0.18.1 (Closes: #930266).
+  * Bump Standards-Version to 4.3.0 (no changes needed)
+
+  [ Julien Puydt ]
+  * New upstream version 0.20.3.
+  * Bump dh compat to 13 and drop d/compat.
+  * Install files in the new standard location /usr/share/nodejs.
+  * Bump std-vers to 4.5.0.
+  * Declare d/rules doesn't require root.
+  * Update depends and build-depends.
+  * Make sure tsc finds the deps.
+  * Review which files get installed.
+  * Mark the require test as superficial.
+
+ -- Julien Puydt <jpuydt@debian.org>  Mon, 12 Oct 2020 08:53:05 +0200
+
+node-recast (0.16.1-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <jpuydt@debian.org>  Mon, 19 Nov 2018 15:49:56 +0100
+
+node-recast (0.16.0-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <jpuydt@debian.org>  Sun, 14 Oct 2018 07:37:24 +0200
+
+node-recast (0.15.5-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <jpuydt@debian.org>  Wed, 12 Sep 2018 07:54:22 +0200
+
+node-recast (0.15.3-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <jpuydt@debian.org>  Sun, 29 Jul 2018 08:52:39 +0200
+
+node-recast (0.15.2-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <jpuydt@debian.org>  Fri, 06 Jul 2018 12:40:52 +0200
+
+node-recast (0.15.0-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <jpuydt@debian.org>  Wed, 20 Jun 2018 01:28:31 +0200
+
+node-recast (0.14.7-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <jpuydt@debian.org>  Tue, 01 May 2018 10:44:10 +0200
+
+node-recast (0.14.5-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Tue, 13 Mar 2018 22:49:08 +0100
+
+node-recast (0.14.4-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Wed, 28 Feb 2018 23:10:34 +0100
+
+node-recast (0.13.2-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Mon, 19 Feb 2018 23:47:40 +0100
+
+node-recast (0.13.0-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Sun, 26 Nov 2017 09:46:42 +0100
+
+node-recast (0.12.9-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Mon, 13 Nov 2017 07:50:03 +0100
+
+node-recast (0.12.8-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Tue, 31 Oct 2017 20:52:43 +0100
+
+node-recast (0.12.7-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Bump std-ver to 4.1.1.
+  * Bump d/watch's version to 4.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Sun, 15 Oct 2017 08:53:01 +0200
+
+node-recast (0.12.6-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Mon, 24 Jul 2017 11:01:16 +0200
+
+node-recast (0.12.5-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Bump standards-version up to 4.0.0.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Tue, 27 Jun 2017 13:41:31 +0200
+
+node-recast (0.12.3-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Bump node-ast-types dep.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Sun, 23 Apr 2017 10:33:10 +0200
+
+node-recast (0.11.22-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Fri, 17 Feb 2017 09:58:51 +0100
+
+node-recast (0.11.21-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Thu, 09 Feb 2017 09:14:04 +0100
+
+node-recast (0.11.20-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Fri, 20 Jan 2017 09:14:59 +0100
+
+node-recast (0.11.18-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Tue, 29 Nov 2016 07:42:53 +0100
+
+node-recast (0.11.17-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Wed, 09 Nov 2016 07:44:04 +0100
+
+node-recast (0.11.16-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Mon, 07 Nov 2016 23:39:32 +0100
+
+node-recast (0.11.14-1) unstable; urgency=medium
+
+  * New upstream version.
+  * Pushed dh compat to 10.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Thu, 06 Oct 2016 08:46:27 +0200
+
+node-recast (0.11.12-1) unstable; urgency=medium
+
+  * New upstream version.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Wed, 17 Aug 2016 07:34:30 +0200
+
+node-recast (0.11.4-2) unstable; urgency=medium
+
+  * Added dep on esprima & esprima-fb. (Closes: #827035)
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Sat, 11 Jun 2016 14:27:45 +0200
+
+node-recast (0.11.4-1) unstable; urgency=medium
+
+  * Updated to new upstream.
+  * Push standards-version up.
+  * Fix Vcs-* fields.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Tue, 31 May 2016 18:05:03 +0200
+
+node-recast (0.10.39-1) unstable; urgency=medium
+
+  * Updated to new upstream.
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Fri, 01 Jan 2016 20:02:23 +0100
+
+node-recast (0.10.32-1) unstable; urgency=low
+
+  * Initial release (Closes: #802439)
+
+ -- Julien Puydt <julien.puydt@laposte.net>  Tue, 20 Oct 2015 08:09:18 +0200

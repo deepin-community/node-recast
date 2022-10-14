@@ -1,0 +1,41 @@
+Source: node-recast
+Section: javascript
+Priority: optional
+Maintainer: Debian Javascript Maintainers <pkg-javascript-devel@lists.alioth.debian.org>
+Uploaders: Julien Puydt <jpuydt@debian.org>
+Build-Depends: debhelper-compat (= 13)
+ , dh-sequence-nodejs
+ , mocha
+ , node-acorn <!nocheck>
+ , node-ast-types
+ , node-babel7
+ , node-esprima
+ , node-esprima-fb
+ , node-private
+ , node-source-map
+ , node-tslib
+ , node-typescript
+ , node-types-estree
+ , ts-node <!nocheck>
+Standards-Version: 4.6.0
+Vcs-Browser: https://salsa.debian.org/git/js-team/node-recast
+Vcs-Git: https://salsa.debian.org/js-team/node-recast.git
+Homepage: https://github.com/benjamn/recast
+Testsuite: autopkgtest-pkg-nodejs
+Rules-Requires-Root: no
+
+Package: node-recast
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}
+ , node-ast-types (>= 0.14.1)
+ , node-esprima
+ , node-private
+ , node-source-map
+ , node-tslib
+ , nodejs
+Description: Pretty printer and syntax tree transformer for JavaScript
+ JavaScript syntax tree transformer, nondestructive pretty-printer, and
+ automatic source map generator
+ .
+ Node.js is an event-based server-side JavaScript engine.

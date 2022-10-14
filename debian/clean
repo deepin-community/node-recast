@@ -1,0 +1,9 @@
+lib/*.d.ts
+lib/*.js
+main.d.ts
+main.js
+node_modules/
+parsers/*.d.ts
+parsers/*.js
+test/*.d.ts
+test/*.js
