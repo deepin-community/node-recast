@@ -7,7 +7,7 @@ Build-Depends: debhelper-compat (= 13)
  , dh-sequence-nodejs
  , mocha
  , node-acorn <!nocheck>
- , node-ast-types
+ , node-ast-types (>= 0.15.2~)
  , node-babel7
  , node-esprima
  , node-esprima-fb
@@ -17,7 +17,7 @@ Build-Depends: debhelper-compat (= 13)
  , node-typescript
  , node-types-estree
  , ts-node <!nocheck>
-Standards-Version: 4.6.0
+Standards-Version: 4.6.1
 Vcs-Browser: https://salsa.debian.org/git/js-team/node-recast
 Vcs-Git: https://salsa.debian.org/js-team/node-recast.git
 Homepage: https://github.com/benjamn/recast
@@ -28,12 +28,11 @@ Package: node-recast
 Architecture: all
 Multi-Arch: foreign
 Depends: ${misc:Depends}
- , node-ast-types (>= 0.14.1)
+ , node-ast-types (>= 0.15.2)
  , node-esprima
  , node-private
  , node-source-map
  , node-tslib
- , nodejs
 Description: Pretty printer and syntax tree transformer for JavaScript
  JavaScript syntax tree transformer, nondestructive pretty-printer, and
  automatic source map generator

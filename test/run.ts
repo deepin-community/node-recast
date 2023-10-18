@@ -1,10 +1,11 @@
 import "./babel";
 import "./comments";
-import "./es6tests";
+import "./ecmascript";
 import "./identity";
 import "./jsx";
 import "./lines";
 import "./mapping";
+import "./parens-extra";
 import "./parens";
 import "./parser";
 import "./patcher";

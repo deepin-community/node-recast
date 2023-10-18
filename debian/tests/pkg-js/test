@@ -1,3 +1,3 @@
-for name in babel.ts comments.ts es6tests.ts identity.ts jsx.ts lines.ts mapping.ts parens-babylon.ts parens.ts parser.ts patcher.ts syntax.ts typescript.ts visit.ts; do
+for name in babel.ts comments.ts identity.ts jsx.ts lines.ts mapping.ts parens-extra.ts parens.ts parser.ts patcher.ts syntax.ts visit.ts; do
   mocha -r ts-node/register test/$name
 done
