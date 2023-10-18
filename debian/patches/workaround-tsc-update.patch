@@ -1,32 +1,62 @@
 Description: workaround tsc update
 Author: Yadd <yadd@debian.org>
 Forwarded: not-needed
-Last-Update: 2021-09-17
+Last-Update: 2021-12-07
 
---- a/test/es6tests.ts
-+++ b/test/es6tests.ts
+--- node-recast.orig/lib/printer.ts
++++ node-recast/lib/printer.ts
+@@ -3055,6 +3055,7 @@
+     | types.namedTypes.StringLiteral
+     | types.namedTypes.RegExpLiteral
+     | types.namedTypes.BigIntLiteral
++// @ts-ignore
+     | types.namedTypes.DecimalLiteral,
+ ): string | void {
+   const value = types.getFieldValue(node, "value");
+--- node-recast.orig/test/ecmascript.ts
++++ node-recast/test/ecmascript.ts
 @@ -144,6 +144,7 @@
            "Parsing should have failed: " + JSON.stringify(source),
          );
        } catch (err) {
-+        // @ts-ignore
++	//@ts-ignore
          assert.strictEqual(err.message, "Line 1: " + expectedMessage);
        }
      }
---- a/test/typescript.ts
-+++ b/test/typescript.ts
-@@ -409,12 +409,14 @@
+--- node-recast.orig/test/printer.ts
++++ node-recast/test/printer.ts
+@@ -2241,6 +2241,7 @@
+     assert.strictEqual(pretty, code);
+ 
+     types.visit(ast, {
++// @ts-ignore
+       visitStaticBlock(path) {
+         assert.strictEqual(path.get("body", "length").value, 2);
+         while (path.get("body").shift()) {}
+@@ -2306,7 +2307,9 @@
+     assert.strictEqual(pretty, expectedPretty);
+ 
+     types.visit(ast, {
++// @ts-ignore
+       visitImportAttribute(path) {
++// @ts-ignore
+         this.traverse(path);
+         const valuePath = path.get("value");
+         const strLit = valuePath.value;
+--- node-recast.orig/test/typescript.ts
++++ node-recast/test/typescript.ts
+@@ -436,12 +436,14 @@
            .toString(),
        );
-     } catch (e2) {
-+      // @ts-ignore
+     } catch (e2: any) {
++      //@ts-ignore
        if (e2.code !== "ENOENT") {
          console.error(e2);
        }
        throw e1;
      }
  
-+    // @ts-ignore
++    //@ts-ignore
      if (options.throws === e1.message) {
        return null;
      }

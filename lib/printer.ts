@@ -20,7 +20,7 @@ interface PrintResultConstructor {
   new (code: any, sourceMap?: any): PrintResultType;
 }
 
-const PrintResult = (function PrintResult(
+const PrintResult = function PrintResult(
   this: PrintResultType,
   code: any,
   sourceMap?: any,
@@ -34,7 +34,7 @@ const PrintResult = (function PrintResult(
     isObject.assert(sourceMap);
     this.map = sourceMap;
   }
-} as any) as PrintResultConstructor;
+} as any as PrintResultConstructor;
 
 const PRp: PrintResultType = PrintResult.prototype;
 let warnedAboutToString = false;
@@ -64,7 +64,7 @@ interface PrinterConstructor {
   new (config?: any): PrinterType;
 }
 
-const Printer = (function Printer(this: PrinterType, config?: any) {
+const Printer = function Printer(this: PrinterType, config?: any) {
   assert.ok(this instanceof Printer);
 
   const explicitTabWidth = config && config.tabWidth;
@@ -181,7 +181,7 @@ const Printer = (function Printer(this: PrinterType, config?: any) {
     config.reuseWhitespace = oldReuseWhitespace;
     return pr;
   };
-} as any) as PrinterConstructor;
+} as any as PrinterConstructor;
 
 export { Printer };
 
@@ -196,14 +196,14 @@ function genericPrint(path: any, config: any, options: any, printPath: any) {
     return linesWithoutParens;
   }
 
-  let shouldAddParens = node.extra ? node.extra.parenthesized : false;
+  let shouldAddParens = false;
   const decoratorsLines = printDecorators(path, printPath);
 
   if (decoratorsLines.isEmpty()) {
     // Nodes with decorators can't have parentheses, so we can avoid
     // computing path.needsParens() except in this case.
     if (!options.avoidRootParens) {
-      shouldAddParens = shouldAddParens || path.needsParens();
+      shouldAddParens = path.needsParens();
     }
   } else {
     parts.push(decoratorsLines);
@@ -445,6 +445,13 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       return concat(parts);
 
+    case "ModuleExpression":
+      return concat([
+        "module {\n",
+        path.call(print, "body").indent(options.tabWidth),
+        "\n}",
+      ]);
+
     case "ModuleDeclaration":
       parts.push("module", path.call(print, "id"));
 
@@ -602,10 +609,21 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         parts.push(" from ");
       }
 
-      parts.push(path.call(print, "source"), ";");
+      parts.push(
+        path.call(print, "source"),
+        maybePrintImportAssertions(path, options, print),
+        ";",
+      );
 
       return concat(parts);
     }
+
+    case "ImportAttribute":
+      return concat([path.call(print, "key"), ": ", path.call(print, "value")]);
+
+    case "StaticBlock":
+      parts.push("static ");
+    // Intentionally fall through to BlockStatement below.
 
     case "BlockStatement": {
       const naked = path.call(
@@ -615,7 +633,8 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       if (naked.isEmpty()) {
         if (!n.directives || n.directives.length === 0) {
-          return fromString("{}");
+          parts.push("{}");
+          return concat(parts);
         }
       }
 
@@ -680,6 +699,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       return concat(parts);
 
+    case "RecordExpression":
+      parts.push("#");
+    // Intentionally fall through to printing the object literal...
     case "ObjectExpression":
     case "ObjectPattern":
     case "ObjectTypeAnnotation": {
@@ -818,6 +840,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "Decorator":
       return concat(["@", path.call(print, "expression")]);
 
+    case "TupleExpression":
+      parts.push("#");
+    // Intentionally fall through to printing the tuple elements...
     case "ArrayExpression":
     case "ArrayPattern": {
       const elems: any[] = n.elements;
@@ -889,47 +914,37 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return fromString("null");
 
     case "RegExpLiteral": // Babel 6 Literal split
-      return fromString(n.extra.raw);
+      return fromString(
+        getPossibleRaw(n) || `/${n.pattern}/${n.flags || ""}`,
+        options,
+      );
 
     case "BigIntLiteral": // Babel 7 Literal split
-      return fromString(n.value + "n");
+      return fromString(getPossibleRaw(n) || n.value + "n", options);
 
     case "NumericLiteral": // Babel 6 Literal Split
-      // Keep original representation for numeric values not in base 10.
-      if (
-        n.extra &&
-        typeof n.extra.raw === "string" &&
-        Number(n.extra.raw) === n.value
-      ) {
-        return fromString(n.extra.raw, options);
-      }
+      return fromString(getPossibleRaw(n) || n.value, options);
 
-      return fromString(n.value, options);
+    case "DecimalLiteral":
+      return fromString(getPossibleRaw(n) || n.value + "m", options);
 
     case "BooleanLiteral": // Babel 6 Literal split
     case "StringLiteral": // Babel 6 Literal split
     case "Literal":
-      // Numeric values may be in bases other than 10. Use their raw
-      // representation if equivalent.
-      if (
-        typeof n.value === "number" &&
-        typeof n.raw === "string" &&
-        Number(n.raw) === n.value
-      ) {
-        return fromString(n.raw, options);
-      }
-
-      if (typeof n.value !== "string") {
-        return fromString(n.value, options);
-      }
-
-      return fromString(nodeStr(n.value, options), options);
+      return fromString(
+        getPossibleRaw(n) ||
+          (typeof n.value === "string" ? nodeStr(n.value, options) : n.value),
+        options,
+      );
 
     case "Directive": // Babel 6
       return path.call(print, "value");
 
     case "DirectiveLiteral": // Babel 6
-      return fromString(nodeStr(n.value, options));
+      return fromString(
+        getPossibleRaw(n) || nodeStr(n.value, options),
+        options,
+      );
 
     case "InterpreterDirective":
       return fromString(`#!${n.value}\n`, options);
@@ -1417,6 +1432,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       if (n.optional) {
         parts.push("?");
+      }
+
+      if (n.definite) {
+        parts.push("!");
       }
 
       if (n.typeAnnotation) {
@@ -1988,6 +2007,16 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         path.call(print, "argument"),
       ]);
 
+    case "IndexedAccessType":
+    case "OptionalIndexedAccessType":
+      return concat([
+        path.call(print, "objectType"),
+        n.optional ? "?." : "",
+        "[",
+        path.call(print, "indexType"),
+        "]",
+      ]);
+
     case "UnionTypeAnnotation":
       return fromString(" | ").join(path.map(print, "types"));
 
@@ -2030,6 +2059,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
     case "TSVoidKeyword":
       return fromString("void", options);
+
+    case "TSIntrinsicKeyword":
+      return fromString("intrinsic", options);
 
     case "TSThisType":
       return fromString("this", options);
@@ -2381,12 +2413,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "TSInterfaceBody": {
-      const lines = fromString(";\n").join(path.map(print, "body"));
+      const lines = fromString("\n").join(path.map(print, "body"));
       if (lines.isEmpty()) {
         return fromString("{}", options);
       }
-
-      return concat(["{\n", lines.indent(options.tabWidth), ";", "\n}"]);
+      return concat(["{\n", lines.indent(options.tabWidth), "\n}"]);
     }
 
     case "TSImportType":
@@ -2475,6 +2506,14 @@ function genericPrintNoParens(path: any, options: any, print: any) {
         (bodyPath: any) => printStatementSequence(bodyPath, options, print),
         "body",
       );
+
+    // https://github.com/babel/babel/pull/10148
+    case "V8IntrinsicIdentifier":
+      return concat(["%", path.call(print, "name")]);
+
+    // https://github.com/babel/babel/pull/13191
+    case "TopicReference":
+      return fromString("#");
 
     // Unhandled types below. If encountered, nodes of these types should
     // be either left alone or desugared into AST types that are fully
@@ -2827,6 +2866,30 @@ function printFunctionParams(path: any, options: any, print: any) {
   return joined;
 }
 
+function maybePrintImportAssertions(
+  path: any,
+  options: any,
+  print: any,
+): Lines {
+  const n = path.getValue();
+  if (n.assertions && n.assertions.length > 0) {
+    const parts: (string | Lines)[] = [" assert {"];
+    const printed = path.map(print, "assertions");
+    const flat = fromString(", ").join(printed);
+    if (flat.length > 1 || flat.getLineLength(1) > options.wrapColumn) {
+      parts.push(
+        "\n",
+        fromString(",\n").join(printed).indent(options.tabWidth),
+        "\n}",
+      );
+    } else {
+      parts.push(" ", flat, " }");
+    }
+    return concat(parts);
+  }
+  return fromString("");
+}
+
 function printExportDeclaration(path: any, options: any, print: any) {
   const decl = path.getValue();
   const parts: (string | Lines)[] = ["export "];
@@ -2903,7 +2966,11 @@ function printExportDeclaration(path: any, options: any, print: any) {
     }
 
     if (decl.source) {
-      parts.push(" from ", path.call(print, "source"));
+      parts.push(
+        " from ",
+        path.call(print, "source"),
+        maybePrintImportAssertions(path, options, print),
+      );
     }
   }
 
@@ -2981,19 +3048,49 @@ function swapQuotes(str: string) {
   return str.replace(/['"]/g, (m) => (m === '"' ? "'" : '"'));
 }
 
+function getPossibleRaw(
+  node:
+    | types.namedTypes.Literal
+    | types.namedTypes.NumericLiteral
+    | types.namedTypes.StringLiteral
+    | types.namedTypes.RegExpLiteral
+    | types.namedTypes.BigIntLiteral
+    | types.namedTypes.DecimalLiteral,
+): string | void {
+  const value = types.getFieldValue(node, "value");
+  const extra = types.getFieldValue(node, "extra");
+
+  if (extra && typeof extra.raw === "string" && value == extra.rawValue) {
+    return extra.raw;
+  }
+
+  if (node.type === "Literal") {
+    const raw = (node as typeof extra).raw;
+    if (typeof raw === "string" && value == raw) {
+      return raw;
+    }
+  }
+}
+
+function jsSafeStringify(str: string) {
+  return JSON.stringify(str).replace(/[\u2028\u2029]/g, function (m) {
+    return "\\u" + m.charCodeAt(0).toString(16);
+  });
+}
+
 function nodeStr(str: string, options: any) {
   isString.assert(str);
   switch (options.quote) {
     case "auto": {
-      const double = JSON.stringify(str);
-      const single = swapQuotes(JSON.stringify(swapQuotes(str)));
+      const double = jsSafeStringify(str);
+      const single = swapQuotes(jsSafeStringify(swapQuotes(str)));
       return double.length > single.length ? single : double;
     }
     case "single":
-      return swapQuotes(JSON.stringify(swapQuotes(str)));
+      return swapQuotes(jsSafeStringify(swapQuotes(str)));
     case "double":
     default:
-      return JSON.stringify(str);
+      return jsSafeStringify(str);
   }
 }
 

@@ -8,6 +8,7 @@ const isNumber = types.builtInTypes.number;
 
 const PRECEDENCE: any = {};
 [
+  ["??"],
   ["||"],
   ["&&"],
   ["|"],
@@ -50,10 +51,10 @@ interface FastPathConstructor {
   from(obj: any): any;
 }
 
-const FastPath = (function FastPath(this: FastPathType, value: any) {
+const FastPath = function FastPath(this: FastPathType, value: any) {
   assert.ok(this instanceof FastPath);
   this.stack = [value];
-} as any) as FastPathConstructor;
+} as any as FastPathConstructor;
 
 const FPp: FastPathType = FastPath.prototype;
 
@@ -324,9 +325,6 @@ FPp.needsParens = function (assumeExpressionContext) {
   }
 
   const parent = this.getParentNode();
-  if (!parent) {
-    return false;
-  }
 
   const name = this.getName();
 
@@ -347,12 +345,15 @@ FPp.needsParens = function (assumeExpressionContext) {
     return false;
   }
 
-  if (
-    parent.type === "ParenthesizedExpression" ||
-    (node.extra && node.extra.parenthesized)
-  ) {
+  if (parent && parent.type === "ParenthesizedExpression") {
     return false;
   }
+
+  if (node.extra && node.extra.parenthesized) {
+    return true;
+  }
+
+  if (!parent) return false;
 
   switch (node.type) {
     case "UnaryExpression":
@@ -422,6 +423,9 @@ FPp.needsParens = function (assumeExpressionContext) {
           // explicit exceptions above if this proves overzealous.
           return true;
       }
+
+    case "OptionalIndexedAccessType":
+      return node.optional && parent.type === "IndexedAccessType";
 
     case "IntersectionTypeAnnotation":
     case "UnionTypeAnnotation":
@@ -640,9 +644,11 @@ FPp.firstInStatement = function () {
       return true;
     }
 
+    // s[i + 1] and s[i + 2] represent the array between the parent
+    // SequenceExpression node and its child nodes
     if (
       n.SequenceExpression.check(parent) &&
-      parentName === "expressions" &&
+      s[i + 1] === "expressions" &&
       childName === 0
     ) {
       assert.strictEqual(parent.expressions[0], child);

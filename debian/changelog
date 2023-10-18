@@ -1,3 +1,41 @@
+node-recast (0.21.1-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #1008515).
+  * Bump standards-version to 4.6.1.
+  * Refresh patches.
+  * Update the tests to the new upstream.
+
+ -- Julien Puydt <jpuydt@debian.org>  Mon, 30 May 2022 16:15:54 +0200
+
+node-recast (0.21.0-3) unstable; urgency=medium
+
+  * Team upload
+  * Drop typescript test (Closes: #1009597)
+
+ -- Yadd <yadd@debian.org>  Fri, 22 Apr 2022 17:50:58 +0200
+
+node-recast (0.21.0-2) unstable; urgency=medium
+
+  * Team upload
+  * Fix filenamemangle
+  * Drop nodejs dependency
+  * Require node-ast-types ≥ 0.15.2~ also for build (fixes debci)
+  * Don't build test files: ts-node/register is called by mocha
+  * Update workaround-tsc-update.patch (fixes debci)
+  * Remove double example install
+
+ -- Yadd <yadd@debian.org>  Tue, 07 Dec 2021 12:05:20 +0100
+
+node-recast (0.21.0-1) unstable; urgency=medium
+
+  * Rewrite d/watch to ignore the out-of-line 1.4.0 (!).
+  * New upstream release 0.21.0.
+  * Bump dep on node-ast-types to 0.15.2.
+  * Refresh patches.
+  * Adapt pkg-js tests to new upstream.
+
+ -- Julien Puydt <jpuydt@debian.org>  Tue, 07 Dec 2021 09:03:59 +0100
+
 node-recast (0.20.5-2) unstable; urgency=medium
 
   * Team upload
