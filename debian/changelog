@@ -1,3 +1,20 @@
+node-recast (0.23.4-2) unstable; urgency=medium
+
+  * Team upload
+  * Fix build links (Closes: #1065480)
+
+ -- Yadd <yadd@debian.org>  Tue, 05 Mar 2024 14:45:37 +0400
+
+node-recast (0.23.4-1) unstable; urgency=medium
+
+  * Team upload
+  * Update standards version to 4.6.2, no changes needed
+  * New upstream version 0.23.4
+  * Refresh patches
+  * Require node-ast-types >= 0.16.1~ (Closes: #1054756)
+
+ -- Yadd <yadd@debian.org>  Thu, 02 Nov 2023 12:01:32 +0400
+
 node-recast (0.21.1-1) unstable; urgency=medium
 
   * New upstream release (Closes: #1008515).

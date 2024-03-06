@@ -1,0 +1,8 @@
+@babel/types
+@types/esprima
+@types/estree
+@types/mocha
+@types/node
+ast-types
+source-map
+tslib

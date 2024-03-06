@@ -1,14 +1,14 @@
 import assert from "assert";
+import * as types from "ast-types";
 import { printComments } from "./comments";
-import { Lines, fromString, concat } from "./lines";
+import FastPath from "./fast-path";
+import { concat, fromString, Lines } from "./lines";
 import { normalize as normalizeOptions } from "./options";
 import { getReprinter } from "./patcher";
-import * as types from "ast-types";
+import * as util from "./util";
 const namedTypes = types.namedTypes;
 const isString = types.builtInTypes.string;
 const isObject = types.builtInTypes.object;
-import FastPath from "./fast-path";
-import * as util from "./util";
 
 export interface PrintResultType {
   code: string;
@@ -483,6 +483,9 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       return concat(parts);
 
     case "ExportSpecifier":
+      if (n.exportKind && n.exportKind !== "value") {
+        parts.push(n.exportKind + " ");
+      }
       if (n.local) {
         parts.push(path.call(print, "local"));
         if (n.exported && n.exported.name !== n.local.name) {
@@ -928,8 +931,10 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "DecimalLiteral":
       return fromString(getPossibleRaw(n) || n.value + "m", options);
 
+    case "StringLiteral":
+        return fromString(nodeStr(n.value, options));
+
     case "BooleanLiteral": // Babel 6 Literal split
-    case "StringLiteral": // Babel 6 Literal split
     case "Literal":
       return fromString(
         getPossibleRaw(n) ||
@@ -1468,8 +1473,42 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       parts.push(";");
       return concat(parts);
 
+    case "ClassAccessorProperty": {
+      parts.push(
+        ...printClassMemberModifiers(n),
+        "accessor ",
+      );
+
+      if (n.computed) {
+        parts.push("[", path.call(print, "key"), "]");
+      } else {
+        parts.push(path.call(print, "key"));
+      }
+
+      if (n.optional) {
+        parts.push("?");
+      }
+
+      if (n.definite) {
+        parts.push("!");
+      }
+
+      if (n.typeAnnotation) {
+        parts.push(path.call(print, "typeAnnotation"));
+      }
+
+      if (n.value) {
+        parts.push(" = ", path.call(print, "value"));
+      }
+
+      parts.push(";");
+
+      return concat(parts);
+    }
+
     case "ClassDeclaration":
     case "ClassExpression":
+    case "DeclareClass":
       if (n.declare) {
         parts.push("declare ");
       }
@@ -1489,10 +1528,19 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       }
 
       if (n.superClass) {
+        // ClassDeclaration and ClassExpression only
         parts.push(
           " extends ",
           path.call(print, "superClass"),
           path.call(print, "superTypeParameters"),
+        );
+      }
+
+      if (n.extends && n.extends.length > 0) {
+        // DeclareClass only
+        parts.push(
+          " extends ",
+          fromString(", ").join(path.map(print, "extends")),
         );
       }
 
@@ -1505,7 +1553,11 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       parts.push(" ", path.call(print, "body"));
 
-      return concat(parts);
+      if (n.type === "DeclareClass") {
+        return printFlowDeclaration(path, parts);
+      } else {
+        return concat(parts);
+      }
 
     case "TemplateElement":
       return fromString(n.value.raw, options).lockIndentTail();
@@ -1659,14 +1711,6 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       }
       parts.push(" ", path.call(print, "body"));
       return concat(parts);
-
-    case "DeclareClass":
-      return printFlowDeclaration(path, [
-        "class ",
-        path.call(print, "id"),
-        " ",
-        path.call(print, "body"),
-      ]);
 
     case "DeclareFunction":
       return printFlowDeclaration(path, [
@@ -2186,13 +2230,20 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "TSTypeLiteral": {
-      const memberLines = fromString(",\n").join(path.map(print, "members"));
+      const members = fromString("\n").join(
+        path.map(print, "members").map((member: Lines) => {
+          if (lastNonSpaceCharacter(member) !== ";") {
+            return member.concat(";");
+          }
+          return member;
+        })
+      );
 
-      if (memberLines.isEmpty()) {
+      if (members.isEmpty()) {
         return fromString("{}", options);
       }
 
-      parts.push("{\n", memberLines.indent(options.tabWidth), "\n}");
+      parts.push("{\n", members.indent(options.tabWidth), "\n}");
 
       return concat(parts);
     }
@@ -2237,15 +2288,23 @@ function genericPrintNoParens(path: any, options: any, print: any) {
     case "TSQualifiedName":
       return concat([path.call(print, "left"), ".", path.call(print, "right")]);
 
-    case "TSAsExpression": {
+    case "TSAsExpression":
+    case "TSSatisfiesExpression":
+    {
       const expression = path.call(print, "expression");
       parts.push(
         expression,
-        fromString(" as "),
+        n.type === "TSSatisfiesExpression" ? " satisfies " : " as ",
         path.call(print, "typeAnnotation"),
       );
       return concat(parts);
     }
+
+    case "TSTypeCastExpression":
+      return concat([
+        path.call(print, "expression"),
+        path.call(print, "typeAnnotation"),
+      ]);
 
     case "TSNonNullExpression":
       return concat([path.call(print, "expression"), "!"]);
@@ -2413,7 +2472,14 @@ function genericPrintNoParens(path: any, options: any, print: any) {
       ]);
 
     case "TSInterfaceBody": {
-      const lines = fromString("\n").join(path.map(print, "body"));
+      const lines = fromString("\n").join(
+        path.map(print, "body").map((element: Lines) => {
+          if (lastNonSpaceCharacter(element) !== ";") {
+            return element.concat(";");
+          }
+          return element;
+        })
+      );
       if (lines.isEmpty()) {
         return fromString("{}", options);
       }
@@ -2487,25 +2553,38 @@ function genericPrintNoParens(path: any, options: any, print: any) {
 
       parts.push(path.call(print, "id"));
 
-      if (n.body && n.body.type === "TSModuleDeclaration") {
+      if (n.body) {
+        parts.push(" ");
         parts.push(path.call(print, "body"));
-      } else if (n.body) {
-        const bodyLines = path.call(print, "body");
-        if (bodyLines.isEmpty()) {
-          parts.push(" {}");
-        } else {
-          parts.push(" {\n", bodyLines.indent(options.tabWidth), "\n}");
-        }
       }
 
       return concat(parts);
     }
 
-    case "TSModuleBlock":
-      return path.call(
+    case "TSModuleBlock": {
+      const naked = path.call(
         (bodyPath: any) => printStatementSequence(bodyPath, options, print),
         "body",
       );
+
+      if (naked.isEmpty()) {
+        parts.push("{}");
+      } else {
+        parts.push("{\n", naked.indent(options.tabWidth), "\n}");
+      }
+
+      return concat(parts);
+    }
+
+    case "TSInstantiationExpression": {
+      parts.push(
+        path.call(print, "expression"),
+        path.call(print, "typeParameters"),
+      );
+
+      return concat(parts);
+    }
+
 
     // https://github.com/babel/babel/pull/10148
     case "V8IntrinsicIdentifier":
@@ -2718,14 +2797,11 @@ function maxSpace(s1: any, s2: any) {
   return spaceLines1;
 }
 
-function printMethod(path: any, options: any, print: any) {
-  const node = path.getNode();
-  const kind = node.kind;
+function printClassMemberModifiers(node: any): string[] {
   const parts = [];
 
-  let nodeValue = node.value;
-  if (!namedTypes.FunctionExpression.check(nodeValue)) {
-    nodeValue = node;
+  if (node.declare) {
+    parts.push("declare ");
   }
 
   const access = node.accessibility || node.access;
@@ -2737,6 +2813,10 @@ function printMethod(path: any, options: any, print: any) {
     parts.push("static ");
   }
 
+  if (node.override) {
+    parts.push("override ");
+  }
+
   if (node.abstract) {
     parts.push("abstract ");
   }
@@ -2744,6 +2824,21 @@ function printMethod(path: any, options: any, print: any) {
   if (node.readonly) {
     parts.push("readonly ");
   }
+
+  return parts;
+}
+
+function printMethod(path: any, options: any, print: any) {
+  const node = path.getNode();
+  const kind = node.kind;
+  const parts = [];
+
+  let nodeValue = node.value;
+  if (!namedTypes.FunctionExpression.check(nodeValue)) {
+    nodeValue = node;
+  }
+
+  parts.push(...printClassMemberModifiers(node));
 
   if (nodeValue.async) {
     parts.push("async ");
