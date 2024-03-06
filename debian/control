@@ -7,7 +7,7 @@ Build-Depends: debhelper-compat (= 13)
  , dh-sequence-nodejs
  , mocha
  , node-acorn <!nocheck>
- , node-ast-types (>= 0.15.2~)
+ , node-ast-types (>= 0.16.1~)
  , node-babel7
  , node-esprima
  , node-esprima-fb
@@ -17,7 +17,7 @@ Build-Depends: debhelper-compat (= 13)
  , node-typescript
  , node-types-estree
  , ts-node <!nocheck>
-Standards-Version: 4.6.1
+Standards-Version: 4.6.2
 Vcs-Browser: https://salsa.debian.org/git/js-team/node-recast
 Vcs-Git: https://salsa.debian.org/js-team/node-recast.git
 Homepage: https://github.com/benjamn/recast

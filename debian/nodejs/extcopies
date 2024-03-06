@@ -1,9 +1,1 @@
-ast-types
 @babel/parser
-@babel/types
-source-map
-tslib
-@types/esprima
-@types/estree
-@types/mocha
-@types/node

@@ -8,8 +8,14 @@ type BabelParser = { parse: typeof babelParse };
 export const parser = (function (): BabelParser {
   try {
     return require("@babel/parser");
-  } catch (e) {
-    return require("babylon");
+  } catch {
+    try {
+      return require("babylon");
+    } catch {
+      throw new Error(
+        "Install @babel/parser to use the `typescript`, `flow`, or `babel` parsers",
+      );
+    }
   }
 })();
 
@@ -22,6 +28,6 @@ export const parser = (function (): BabelParser {
 //
 export function parse(source: string, options?: Overrides) {
   const babelOptions = getBabelOptions(options);
-  babelOptions.plugins.push("jsx", "flow");
+  babelOptions.plugins.push("jsx", "flow", "decoratorAutoAccessors");
   return parser.parse(source, babelOptions);
 }
